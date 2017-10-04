@@ -1,10 +1,13 @@
 package message_bus
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func BenchmarkWorker(b *testing.B) {
 	bus := New()
-	
+
 	bus.Subscribe("topic", func(v bool) {})
 	bus.Subscribe("topic", func(v bool) {})
 

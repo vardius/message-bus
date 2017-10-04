@@ -6,6 +6,7 @@ import (
 	"sync"
 )
 
+// MessageBus implements publish/subscribe messaging paradigm
 type MessageBus interface {
 	Publish(topic string, args ...interface{})
 	Subscribe(topic string, fn interface{}) error
@@ -19,6 +20,7 @@ type messageBus struct {
 	handlers handlersMap
 }
 
+// Publish arguments to given topic subscribers
 func (b *messageBus) Publish(topic string, args ...interface{}) {
 	b.mtx.RLock()
 	defer b.mtx.RUnlock()
@@ -35,6 +37,7 @@ func (b *messageBus) Publish(topic string, args ...interface{}) {
 	}
 }
 
+// Subscribe to a topic
 func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	if reflect.TypeOf(fn).Kind() != reflect.Func {
 		return fmt.Errorf("%s is not a reflect.Func", reflect.TypeOf(fn))
@@ -48,6 +51,7 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	return nil
 }
 
+// Unsubsriber topic
 func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
@@ -67,6 +71,7 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	return fmt.Errorf("Topic %s doesn't exist", topic)
 }
 
+// New creates new MessageBus
 func New() MessageBus {
 	return &messageBus{
 		handlers: make(handlersMap),
