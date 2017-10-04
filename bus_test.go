@@ -2,6 +2,7 @@ package message_bus
 
 import (
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 )
@@ -32,9 +33,14 @@ func TestUnsubscribe(t *testing.T) {
 	handler := func() {}
 
 	bus.Subscribe("test", handler)
-	bus.Unsubscribe("test", handler)
 
-	if bus.Unsubscribe("unexisted", func() {}) != nil {
+	if err := bus.Unsubscribe("test", handler); err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
+
+	if err := bus.Unsubscribe("unexisted", func() {}); err == nil {
+		fmt.Println(err)
 		t.Fail()
 	}
 }
