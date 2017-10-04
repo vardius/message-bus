@@ -31,27 +31,27 @@ package main
 import (
     "fmt"
 
-    bus "github.com/vardius/message-bus"
+    messageBus "github.com/vardius/message-bus"
 )
 
 func main() {
-	bus := New()
+    bus := messageBus.New()
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+    var wg sync.WaitGroup
+    wg.Add(2)
 
-	bus.Subscribe("topic", func(v bool) {
-		defer wg.Done()
-		fmt.Println(v)
-	})
+    bus.Subscribe("topic", func(v bool) {
+        defer wg.Done()
+        fmt.Println(v)
+    })
 
-	bus.Subscribe("topic", func(v bool) {
-		defer wg.Done()
-		fmt.Println(v)
-	})
+    bus.Subscribe("topic", func(v bool) {
+        defer wg.Done()
+        fmt.Println(v)
+    })
 
-	bus.Publish("topic", true)
-	wg.Wait()
+    bus.Publish("topic", true)
+    wg.Wait()
 }
 ```
 
