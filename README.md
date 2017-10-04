@@ -31,11 +31,11 @@ package main
 import (
     "fmt"
 
-    messageBus "github.com/vardius/message-bus"
+    "github.com/vardius/message-bus"
 )
 
 func main() {
-    bus := messageBus.New()
+    bus := messagebus.New()
 
     var wg sync.WaitGroup
     wg.Add(2)
