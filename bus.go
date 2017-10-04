@@ -26,13 +26,10 @@ func (b *messageBus) Publish(topic string, args ...interface{}) {
 	defer b.mtx.RUnlock()
 
 	if hs, ok := b.handlers[topic]; ok {
-		fArgs := make([]reflect.Value, 0)
-		for _, arg := range args {
-			fArgs = append(fArgs, reflect.ValueOf(arg))
-		}
+		rArgs := buildHandlerArgs(args)
 
 		for _, h := range hs {
-			go h.Call(fArgs)
+			go h.Call(rArgs)
 		}
 	}
 }
@@ -69,6 +66,16 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	}
 
 	return fmt.Errorf("Topic %s doesn't exist", topic)
+}
+
+func buildHandlerArgs(args []interface{}) []reflect.Value {
+	reflectedArgs := make([]reflect.Value, 0)
+
+	for _, arg := range args {
+		reflectedArgs = append(reflectedArgs, reflect.ValueOf(arg))
+	}
+
+	return reflectedArgs
 }
 
 // New creates new MessageBus
