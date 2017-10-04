@@ -76,7 +76,7 @@ func TestHandleError(t *testing.T) {
 	out := make(chan error)
 	defer close(out)
 
-	bus.Publish("topic", out, &struct{}{})
+	bus.Publish("topic", out)
 
 	if <-out == nil {
 		t.Fail()

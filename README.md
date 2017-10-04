@@ -35,7 +35,7 @@ import (
 )
 
 func main() {
-    bus := New()
+	bus := New()
 
 	var wg sync.WaitGroup
 	wg.Add(2)
