@@ -24,6 +24,7 @@ HOW TO USE
 
 1. [GoDoc](http://godoc.org/github.com/vardius/message-bus)
 
+## Benchmark
 ```bash
 ➜  message-bus git:(master) go test -bench=. -cpu=4
 BenchmarkWorker-4         500000              2507 ns/op
