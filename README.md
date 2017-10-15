@@ -29,7 +29,6 @@ HOW TO USE
 ➜  message-bus git:(master) go test -bench=. -cpu=4
 BenchmarkWorker-4         500000              2507 ns/op
 PASS
-ok      _/Users/vardius/Projects/message-bus    1.307s
 ```
 
 ## Basic example
