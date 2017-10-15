@@ -1,9 +1,6 @@
 package messagebus
 
-import (
-	"bytes"
-	"testing"
-)
+import "testing"
 
 func BenchmarkWorker(b *testing.B) {
 	bus := New()
@@ -13,9 +10,7 @@ func BenchmarkWorker(b *testing.B) {
 
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
-		var buf bytes.Buffer
 		for pb.Next() {
-			buf.Reset()
 			bus.Publish("topic", true)
 		}
 	})
