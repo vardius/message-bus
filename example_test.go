@@ -25,8 +25,7 @@ func Example() {
 
 	bus.Publish("topic", true)
 	wg.Wait()
-
-	// Unordered Output:
+	// Unordered output: 2
 	// s1 true
 	// s2 true
 }
