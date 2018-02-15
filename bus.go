@@ -20,7 +20,7 @@ type messageBus struct {
 	handlers handlersMap
 }
 
-// Publish arguments to given topic subscribers
+// Publish publishes arguments to the given topic subscribers
 func (b *messageBus) Publish(topic string, args ...interface{}) {
 	b.mtx.RLock()
 	defer b.mtx.RUnlock()
@@ -34,7 +34,7 @@ func (b *messageBus) Publish(topic string, args ...interface{}) {
 	}
 }
 
-// Subscribe to a topic
+// Subscribe subscribes to the given topic
 func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	if reflect.TypeOf(fn).Kind() != reflect.Func {
 		return fmt.Errorf("%s is not a reflect.Func", reflect.TypeOf(fn))
@@ -48,7 +48,7 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	return nil
 }
 
-// Unsubsriber topic
+// Unsubscribe unsubsribes from the given topic
 func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
