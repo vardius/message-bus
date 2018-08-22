@@ -3,12 +3,13 @@ package messagebus
 import (
 	"errors"
 	"fmt"
+	"runtime"
 	"sync"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	bus := New()
+	bus := New(runtime.NumCPU())
 
 	if bus == nil {
 		t.Fail()
@@ -16,7 +17,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestSubscribe(t *testing.T) {
-	bus := New()
+	bus := New(runtime.NumCPU())
 
 	if bus.Subscribe("test", func() {}) != nil {
 		t.Fail()
@@ -28,7 +29,7 @@ func TestSubscribe(t *testing.T) {
 }
 
 func TestUnsubscribe(t *testing.T) {
-	bus := New()
+	bus := New(runtime.NumCPU())
 
 	handler := func() {}
 
@@ -46,7 +47,7 @@ func TestUnsubscribe(t *testing.T) {
 }
 
 func TestPublish(t *testing.T) {
-	bus := New()
+	bus := New(runtime.NumCPU())
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -74,7 +75,7 @@ func TestPublish(t *testing.T) {
 }
 
 func TestHandleError(t *testing.T) {
-	bus := New()
+	bus := New(runtime.NumCPU())
 	bus.Subscribe("topic", func(out chan<- error) {
 		out <- errors.New("I do throw error")
 	})

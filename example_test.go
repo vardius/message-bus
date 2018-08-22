@@ -2,13 +2,14 @@ package messagebus_test
 
 import (
 	"fmt"
+	"runtime"
 	"sync"
 
 	"github.com/vardius/message-bus"
 )
 
 func Example() {
-	bus := messagebus.New()
+	bus := messagebus.New(runtime.NumCPU())
 
 	var wg sync.WaitGroup
 	wg.Add(2)

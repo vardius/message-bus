@@ -29,9 +29,17 @@ HOW TO USE
 
 **RAM: 16 GB 2133 MHz LPDDR3**
 ```bash
-➜  message-bus git:(master) go test -bench=. -cpu=4
-BenchmarkWorker-4         500000              2507 ns/op
+goos: darwin
+goarch: amd64
+pkg: github.com/vardius/message-bus
+BenchmarkWorker100-4                           3         352169727 ns/op
+BenchmarkWorkerNumCPU-4                        5         301247338 ns/op
+BenchmarkWorker-4                             10         182287824 ns/op
+BenchmarkWorker100Parallel-4                  10         117857721 ns/op
+BenchmarkWorkerNumCPUParallel-4               10         113668659 ns/op
+BenchmarkWorkerParallel-4                     10         105661820 ns/op
 PASS
+ok      github.com/vardius/message-bus  15.889s
 ```
 
 ## Basic example
@@ -45,7 +53,7 @@ import (
 )
 
 func main() {
-    bus := messagebus.New()
+    bus := messagebus.New(runtime.NumCPU())
 
     var wg sync.WaitGroup
     wg.Add(2)

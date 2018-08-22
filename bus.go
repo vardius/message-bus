@@ -16,8 +16,10 @@ type MessageBus interface {
 type handlersMap map[string][]reflect.Value
 
 type messageBus struct {
-	mtx      sync.RWMutex
-	handlers handlersMap
+	maxConcurrentCalls int
+	mtx                sync.RWMutex
+	handlers           handlersMap
+	semaphore          chan reflect.Value
 }
 
 // Publish publishes arguments to the given topic subscribers
@@ -29,7 +31,15 @@ func (b *messageBus) Publish(topic string, args ...interface{}) {
 		rArgs := buildHandlerArgs(args)
 
 		for _, h := range hs {
-			go h.Call(rArgs)
+			select {
+			case b.semaphore <- h:
+				go func() {
+					h := <-b.semaphore
+					h.Call(rArgs)
+				}()
+			default:
+				h.Call(rArgs)
+			}
 		}
 	}
 }
@@ -48,7 +58,7 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	return nil
 }
 
-// Unsubscribe unsubsribes from the given topic
+// Unsubscribe unsubscribes from the given topic
 func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
@@ -79,8 +89,11 @@ func buildHandlerArgs(args []interface{}) []reflect.Value {
 }
 
 // New creates new MessageBus
-func New() MessageBus {
+// maxConcurrentCalls limits concurrency by using a buffered channel semaphore
+func New(maxConcurrentCalls int) MessageBus {
 	return &messageBus{
-		handlers: make(handlersMap),
+		maxConcurrentCalls: maxConcurrentCalls,
+		handlers:           make(handlersMap),
+		semaphore:          make(chan reflect.Value, maxConcurrentCalls),
 	}
 }
