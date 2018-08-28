@@ -48,6 +48,7 @@ package main
 
 import (
     "fmt"
+	"runtime"
 
     "github.com/vardius/message-bus"
 )
