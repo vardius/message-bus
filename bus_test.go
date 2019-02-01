@@ -58,7 +58,7 @@ func TestClose(t *testing.T) {
 		t.Fail()
 	}
 
-	bus.Close()
+	bus.Close("test")
 
 	original, ok := bus.(*messageBus)
 	if !ok {

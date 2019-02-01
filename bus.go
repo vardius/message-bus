@@ -10,6 +10,7 @@ import (
 // MessageBus implements publish/subscribe messaging paradigm
 type MessageBus interface {
 	Publish(topic string, args ...interface{})
+	Close(topic string)
 	Subscribe(topic string, fn interface{}) error
 	Unsubscribe(topic string, fn interface{}) error
 }
@@ -101,19 +102,21 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	return fmt.Errorf("Topic %s doesn't exist", topic)
 }
 
-// Close unsubscribes all handlers
-func (b *messageBus) Close() {
+// Close unsubscribes all handlers from given topic
+func (b *messageBus) Close(topic string) {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
 
-	for _, handlers := range b.handlers {
-		for _, h := range handlers {
+	if _, ok := b.handlers[topic]; ok {
+		for _, h := range b.handlers[topic] {
 			h.cancel()
 			close(h.queue)
 		}
-	}
 
-	b.handlers = make(handlersMap)
+		delete(b.handlers, topic)
+
+		return
+	}
 }
 
 func buildHandlerArgs(args []interface{}) []reflect.Value {
