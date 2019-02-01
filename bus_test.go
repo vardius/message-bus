@@ -46,6 +46,32 @@ func TestUnsubscribe(t *testing.T) {
 	}
 }
 
+func TestClose(t *testing.T) {
+	bus := New(runtime.NumCPU())
+
+	handler := func() {}
+
+	bus.Subscribe("test", handler)
+
+	if 0 == len(original.handlers) {
+		fmt.Println("Did not subscribed handler")
+		t.Fail()
+	}
+
+	bus.Close()
+
+	original, ok := bus.(*messageBus)
+	if !ok {
+		fmt.Println("Could not cast message bus to its original type")
+		t.Fail()
+	}
+
+	if 0 != len(original.handlers) {
+		fmt.Println("Did not unsubscribed all handlers")
+		t.Fail()
+	}
+}
+
 func TestPublish(t *testing.T) {
 	bus := New(runtime.NumCPU())
 
