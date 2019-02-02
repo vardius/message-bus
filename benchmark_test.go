@@ -5,8 +5,8 @@ import (
 	"testing"
 )
 
-func addSubscribers(bus MessageBus) {
-	for i := 0; i < 1000000; i++ {
+func addSubscribers(bus MessageBus, max int) {
+	for i := 0; i < max; i++ {
 		bus.Subscribe("topic", func(v bool) {})
 	}
 }
@@ -29,42 +29,42 @@ func runParallel(b *testing.B, bus MessageBus) {
 
 func BenchmarkWorkerNumCPU(b *testing.B) {
 	bus := New(runtime.NumCPU())
-	addSubscribers(bus)
+	addSubscribers(bus, runtime.NumCPU())
 
 	run(b, bus)
 }
 
 func BenchmarkWorkerNumCPUParallel(b *testing.B) {
 	bus := New(runtime.NumCPU())
-	addSubscribers(bus)
+	addSubscribers(bus, runtime.NumCPU())
 
 	runParallel(b, bus)
 }
 
 func BenchmarkWorker(b *testing.B) {
-	bus := New(0)
-	addSubscribers(bus)
+	bus := New(100)
+	addSubscribers(bus, 100)
 
 	run(b, bus)
 }
 
 func BenchmarkWorkerParallel(b *testing.B) {
-	bus := New(0)
-	addSubscribers(bus)
+	bus := New(100)
+	addSubscribers(bus, 100)
 
 	runParallel(b, bus)
 }
 
 func BenchmarkWorker100(b *testing.B) {
 	bus := New(100)
-	addSubscribers(bus)
+	addSubscribers(bus, 100)
 
 	run(b, bus)
 }
 
 func BenchmarkWorker100Parallel(b *testing.B) {
 	bus := New(100)
-	addSubscribers(bus)
+	addSubscribers(bus, 100)
 
 	runParallel(b, bus)
 }

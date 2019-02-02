@@ -32,12 +32,12 @@ type messageBus struct {
 
 // Publish publishes arguments to the given topic subscribers
 func (b *messageBus) Publish(topic string, args ...interface{}) {
+	rArgs := buildHandlerArgs(args)
+
 	b.mtx.RLock()
 	defer b.mtx.RUnlock()
 
 	if hs, ok := b.handlers[topic]; ok {
-		rArgs := buildHandlerArgs(args)
-
 		for _, h := range hs {
 			h.queue <- rArgs
 		}
@@ -132,6 +132,10 @@ func buildHandlerArgs(args []interface{}) []reflect.Value {
 // New creates new MessageBus
 // maxConcurrentCalls limits concurrency by using a buffered channel semaphore
 func New(maxConcurrentCalls int) MessageBus {
+	if maxConcurrentCalls == 0 {
+		panic("maxConcurrentCalls has to be greater then 0")
+	}
+
 	return &messageBus{
 		maxConcurrentCalls: maxConcurrentCalls,
 		handlers:           make(handlersMap),

@@ -28,18 +28,20 @@ HOW TO USE
 **CPU: 3,3 GHz Intel Core i7**
 
 **RAM: 16 GB 2133 MHz LPDDR3**
+
 ```bash
+➜  message-bus git:(master) ✗ go test -bench=. -cpu=4 -benchmem
 goos: darwin
 goarch: amd64
 pkg: github.com/vardius/message-bus
-BenchmarkWorker100-4                           3         352169727 ns/op
-BenchmarkWorkerNumCPU-4                        5         301247338 ns/op
-BenchmarkWorker-4                             10         182287824 ns/op
-BenchmarkWorker100Parallel-4                  10         117857721 ns/op
-BenchmarkWorkerNumCPUParallel-4               10         113668659 ns/op
-BenchmarkWorkerParallel-4                     10         105661820 ns/op
+BenchmarkWorkerNumCPU-4                   500000              2321 ns/op              48 B/op          2 allocs/op
+BenchmarkWorkerNumCPUParallel-4          1000000              1595 ns/op              48 B/op          2 allocs/op
+BenchmarkWorker-4                         100000             16878 ns/op              48 B/op          2 allocs/op
+BenchmarkWorkerParallel-4                 100000             17454 ns/op              48 B/op          2 allocs/op
+BenchmarkWorker100-4                      100000             16631 ns/op              48 B/op          2 allocs/op
+BenchmarkWorker100Parallel-4              100000             16793 ns/op              48 B/op          2 allocs/op
 PASS
-ok      github.com/vardius/message-bus  15.889s
+ok      github.com/vardius/message-bus  10.350s
 ```
 
 ## Basic example
