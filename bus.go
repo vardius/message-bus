@@ -25,12 +25,13 @@ type handler struct {
 }
 
 type messageBus struct {
-	maxConcurrentCalls int
-	mtx                sync.RWMutex
-	handlers           handlersMap
+	handlerQueueSize int
+	mtx              sync.RWMutex
+	handlers         handlersMap
 }
 
 // Publish publishes arguments to the given topic subscribers
+// Publish block only when the buffer of one of the subscribers is full.
 func (b *messageBus) Publish(topic string, args ...interface{}) {
 	rArgs := buildHandlerArgs(args)
 
@@ -56,7 +57,7 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 		callback: reflect.ValueOf(fn),
 		ctx:      ctx,
 		cancel:   cancel,
-		queue:    make(chan []reflect.Value, b.maxConcurrentCalls),
+		queue:    make(chan []reflect.Value, b.handlerQueueSize),
 	}
 
 	go func() {
@@ -130,14 +131,14 @@ func buildHandlerArgs(args []interface{}) []reflect.Value {
 }
 
 // New creates new MessageBus
-// maxConcurrentCalls limits concurrency by using a buffered channel semaphore
-func New(maxConcurrentCalls int) MessageBus {
-	if maxConcurrentCalls == 0 {
-		panic("maxConcurrentCalls has to be greater then 0")
+// handlerQueueSize sets buffered channel length per subscriber
+func New(handlerQueueSize int) MessageBus {
+	if handlerQueueSize == 0 {
+		panic("handlerQueueSize has to be greater then 0")
 	}
 
 	return &messageBus{
-		maxConcurrentCalls: maxConcurrentCalls,
-		handlers:           make(handlersMap),
+		handlerQueueSize: handlerQueueSize,
+		handlers:         make(handlersMap),
 	}
 }

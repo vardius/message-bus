@@ -2,14 +2,12 @@ package messagebus_test
 
 import (
 	"fmt"
-	"runtime"
 	"sync"
-
-	"github.com/vardius/message-bus"
 )
 
 func Example() {
-	bus := messagebus.New(runtime.NumCPU())
+	queueSize := 100
+	bus := messagebus.New(queueSize)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -24,8 +22,11 @@ func Example() {
 		fmt.Println("s2", v)
 	})
 
+	// Publish block only when the buffer of one of the subscribers is full.
+	// change the buffer size altering queueSize when creating new messagebus
 	bus.Publish("topic", true)
 	wg.Wait()
+
 	// Unordered output:
 	// s1 true
 	// s2 true

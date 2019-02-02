@@ -49,13 +49,13 @@ package main
 
 import (
     "fmt"
-    "runtime"
 
     "github.com/vardius/message-bus"
 )
 
 func main() {
-    bus := messagebus.New(runtime.NumCPU())
+    queueSize := 100
+    bus := messagebus.New(queueSize)
 
     var wg sync.WaitGroup
     wg.Add(2)
@@ -70,6 +70,8 @@ func main() {
         fmt.Println(v)
     })
 
+	// Publish block only when the buffer of one of the subscribers is full.
+	// change the buffer size altering queueSize when creating new messagebus
     bus.Publish("topic", true)
     wg.Wait()
 }
