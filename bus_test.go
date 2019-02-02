@@ -53,18 +53,18 @@ func TestClose(t *testing.T) {
 
 	bus.Subscribe("test", handler)
 
+	original, ok := bus.(*messageBus)
+	if !ok {
+		fmt.Println("Could not cast message bus to its original type")
+		t.Fail()
+	}
+
 	if 0 == len(original.handlers) {
 		fmt.Println("Did not subscribed handler")
 		t.Fail()
 	}
 
 	bus.Close("test")
-
-	original, ok := bus.(*messageBus)
-	if !ok {
-		fmt.Println("Could not cast message bus to its original type")
-		t.Fail()
-	}
 
 	if 0 != len(original.handlers) {
 		fmt.Println("Did not unsubscribed all handlers")
