@@ -27,42 +27,42 @@ func runParallel(b *testing.B, bus MessageBus) {
 	})
 }
 
-func BenchmarkWorkerNumCPU(b *testing.B) {
+func BenchmarkBusNumCPU(b *testing.B) {
 	bus := New(runtime.NumCPU())
 	addSubscribers(bus, runtime.NumCPU())
 
 	run(b, bus)
 }
 
-func BenchmarkWorkerNumCPUParallel(b *testing.B) {
+func BenchmarkBusNumCPUParallel(b *testing.B) {
 	bus := New(runtime.NumCPU())
 	addSubscribers(bus, runtime.NumCPU())
 
 	runParallel(b, bus)
 }
 
-func BenchmarkWorker(b *testing.B) {
-	bus := New(100)
-	addSubscribers(bus, 100)
+func BenchmarkBus(b *testing.B) {
+	bus := New(1)
+	addSubscribers(bus, 1)
 
 	run(b, bus)
 }
 
-func BenchmarkWorkerParallel(b *testing.B) {
-	bus := New(100)
-	addSubscribers(bus, 100)
+func BenchmarkBusParallel(b *testing.B) {
+	bus := New(1)
+	addSubscribers(bus, 1)
 
 	runParallel(b, bus)
 }
 
-func BenchmarkWorker100(b *testing.B) {
+func BenchmarkBus100(b *testing.B) {
 	bus := New(100)
 	addSubscribers(bus, 100)
 
 	run(b, bus)
 }
 
-func BenchmarkWorker100Parallel(b *testing.B) {
+func BenchmarkBus100Parallel(b *testing.B) {
 	bus := New(100)
 	addSubscribers(bus, 100)
 
