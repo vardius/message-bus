@@ -60,14 +60,14 @@ func TestClose(t *testing.T) {
 	}
 
 	if 0 == len(original.handlers) {
-		fmt.Println("Did not subscribed handler")
+		fmt.Println("Did not subscribed handler to topic")
 		t.Fail()
 	}
 
 	bus.Close("test")
 
 	if 0 != len(original.handlers) {
-		fmt.Println("Did not unsubscribed all handlers")
+		fmt.Println("Did not unsubscribed handlers from topic")
 		t.Fail()
 	}
 }
