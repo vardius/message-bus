@@ -70,8 +70,8 @@ func main() {
         fmt.Println(v)
     })
 
-	// Publish block only when the buffer of one of the subscribers is full.
-	// change the buffer size altering queueSize when creating new messagebus
+    // Publish block only when the buffer of one of the subscribers is full.
+    // change the buffer size altering queueSize when creating new messagebus
     bus.Publish("topic", true)
     wg.Wait()
 }
