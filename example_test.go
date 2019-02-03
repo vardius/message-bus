@@ -3,6 +3,8 @@ package messagebus_test
 import (
 	"fmt"
 	"sync"
+
+	"github.com/vardius/message-bus"		
 )
 
 func Example() {
