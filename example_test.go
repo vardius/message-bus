@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/vardius/message-bus"		
+	messagebus "github.com/vardius/message-bus"
 )
 
 func Example() {
