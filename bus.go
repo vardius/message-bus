@@ -81,7 +81,7 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	return nil
 }
 
-// Unsubscribe unsubscribes from the given topic
+// Unsubscribe unsubscribe handler from the given topic
 func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
@@ -103,7 +103,7 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	return fmt.Errorf("Topic %s doesn't exist", topic)
 }
 
-// Close unsubscribes all handlers from given topic
+// Close unsubscribe all handlers from given topic
 func (b *messageBus) Close(topic string) {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
