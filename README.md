@@ -33,14 +33,16 @@ HOW TO USE
 ➜  message-bus git:(master) ✗ go test -bench=. -cpu=4 -benchmem
 goos: darwin
 goarch: amd64
-BenchmarkBusNumCPU-4              500000              2565 ns/op              48 B/op          2 allocs/op
-BenchmarkBusNumCPUParallel-4     1000000              1682 ns/op              48 B/op          2 allocs/op
-BenchmarkBus-4                   1000000              1105 ns/op              48 B/op          2 allocs/op
-BenchmarkBusParallel-4           2000000               955 ns/op              48 B/op          2 allocs/op
-BenchmarkBus100-4                 100000             18328 ns/op              48 B/op          2 allocs/op
-BenchmarkBus100Parallel-4         100000             18369 ns/op              48 B/op          2 allocs/op
+BenchmarkBus-4                   3000000               534 ns/op              56 B/op          3 allocs/op
+BenchmarkBusParallel-4           5000000               313 ns/op              48 B/op          2 allocs/op
+BenchmarkBus100-4                 100000             14651 ns/op              56 B/op          3 allocs/op
+BenchmarkBus100Parallel-4         300000             14130 ns/op              48 B/op          2 allocs/op
+BenchmarkBus1000-4                 10000            159269 ns/op              56 B/op          3 allocs/op
+BenchmarkBus1000Parallel-4         10000            142578 ns/op              48 B/op          2 allocs/op
+BenchmarkBusNumCPU-4             1000000              1155 ns/op              56 B/op          3 allocs/op
+BenchmarkBusNumCPUParallel-4     2000000               774 ns/op              48 B/op          2 allocs/op
 PASS
-ok      message-bus    11.148s
+ok      message-bus    23.125s
 ```
 
 ## Basic example

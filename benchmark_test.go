@@ -5,16 +5,10 @@ import (
 	"testing"
 )
 
-func addSubscribers(bus MessageBus, max int) {
-	for i := 0; i < max; i++ {
-		bus.Subscribe("topic", func(v bool) {})
-	}
-}
-
 func run(b *testing.B, bus MessageBus) {
 	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
-		bus.Publish("topic", true)
+		bus.Publish("topic", n)
 	}
 }
 
@@ -22,49 +16,56 @@ func runParallel(b *testing.B, bus MessageBus) {
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			bus.Publish("topic", true)
+			bus.Publish("topic", 1)
 		}
 	})
 }
 
-func BenchmarkBusNumCPU(b *testing.B) {
-	bus := New(runtime.NumCPU())
-	addSubscribers(bus, runtime.NumCPU())
+func runBenchmark(b *testing.B, subscribersAmount int, runInParallel bool) {
+	ch := make(chan int, b.N)
+	defer close(ch)
 
-	run(b, bus)
-}
+	bus := New(b.N)
 
-func BenchmarkBusNumCPUParallel(b *testing.B) {
-	bus := New(runtime.NumCPU())
-	addSubscribers(bus, runtime.NumCPU())
+	for i := 0; i < subscribersAmount; i++ {
+		bus.Subscribe("topic", func(i int) {})
+	}
 
-	runParallel(b, bus)
+	if runInParallel {
+		runParallel(b, bus)
+	} else {
+		run(b, bus)
+	}
 }
 
 func BenchmarkBus(b *testing.B) {
-	bus := New(1)
-	addSubscribers(bus, 1)
-
-	run(b, bus)
+	runBenchmark(b, 1, false)
 }
 
 func BenchmarkBusParallel(b *testing.B) {
-	bus := New(1)
-	addSubscribers(bus, 1)
-
-	runParallel(b, bus)
+	runBenchmark(b, 1, true)
 }
 
 func BenchmarkBus100(b *testing.B) {
-	bus := New(100)
-	addSubscribers(bus, 100)
-
-	run(b, bus)
+	runBenchmark(b, 100, false)
 }
 
 func BenchmarkBus100Parallel(b *testing.B) {
-	bus := New(100)
-	addSubscribers(bus, 100)
+	runBenchmark(b, 100, true)
+}
 
-	runParallel(b, bus)
+func BenchmarkBus1000(b *testing.B) {
+	runBenchmark(b, 1000, false)
+}
+
+func BenchmarkBus1000Parallel(b *testing.B) {
+	runBenchmark(b, 1000, true)
+}
+
+func BenchmarkBusNumCPU(b *testing.B) {
+	runBenchmark(b, runtime.NumCPU()+1, false)
+}
+
+func BenchmarkBusNumCPUParallel(b *testing.B) {
+	runBenchmark(b, runtime.NumCPU()+1, true)
 }
