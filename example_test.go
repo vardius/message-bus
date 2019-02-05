@@ -33,3 +33,35 @@ func Example() {
 	// s1 true
 	// s2 true
 }
+
+func Example_second() {
+	queueSize := 2
+	subscribersAmount := 3
+
+	ch := make(chan int, queueSize)
+	defer close(ch)
+
+	bus := messagebus.New(queueSize)
+
+	for i := 0; i < subscribersAmount; i++ {
+		bus.Subscribe("topic", func(i int, out chan<- int) { out <- i })
+	}
+
+	go func() {
+		for n := 0; n < queueSize; n++ {
+			bus.Publish("topic", n, ch)
+		}
+	}()
+
+	var sum = 0
+	for sum < (subscribersAmount * queueSize) {
+		select {
+		case <-ch:
+			sum++
+		}
+	}
+
+	fmt.Println(sum)
+	// Output:
+	// 2
+}
