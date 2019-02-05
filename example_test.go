@@ -63,5 +63,5 @@ func Example_second() {
 
 	fmt.Println(sum)
 	// Output:
-	// 2
+	// 6
 }
