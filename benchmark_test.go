@@ -29,6 +29,8 @@ func runBenchmark(b *testing.B, subscribersAmount int, runInParallel bool) {
 		bus.Subscribe("topic", func(i int, out chan<- int) { out <- i })
 	}
 
+	b.ResetTimer()
+
 	go func() {
 		if runInParallel {
 			runParallel(b, bus, ch)
