@@ -64,9 +64,12 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 		for {
 			select {
 			case args, ok := <-h.queue:
-				if ok {
-					h.callback.Call(args)
+				// check if channel has been closed (by Unsubscribe or Close)
+				if !ok {
+					return
 				}
+
+				h.callback.Call(args)
 			case <-h.ctx.Done():
 				return
 			}
@@ -93,6 +96,7 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 			if h.callback == rv {
 				h.cancel()
 				close(h.queue)
+
 				b.handlers[topic] = append(b.handlers[topic][:i], b.handlers[topic][i+1:]...)
 			}
 		}
