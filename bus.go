@@ -9,9 +9,14 @@ import (
 
 // MessageBus implements publish/subscribe messaging paradigm
 type MessageBus interface {
+	// Publish publishes arguments to the given topic subscribers
+	// Publish block only when the buffer of one of the subscribers is full.
 	Publish(topic string, args ...interface{})
+	// Close unsubscribe all handlers from given topic
 	Close(topic string)
+	// Subscribe subscribes to the given topic
 	Subscribe(topic string, fn interface{}) error
+	// Unsubscribe unsubscribe handler from the given topic
 	Unsubscribe(topic string, fn interface{}) error
 }
 
@@ -30,8 +35,6 @@ type messageBus struct {
 	handlers         handlersMap
 }
 
-// Publish publishes arguments to the given topic subscribers
-// Publish block only when the buffer of one of the subscribers is full.
 func (b *messageBus) Publish(topic string, args ...interface{}) {
 	rArgs := buildHandlerArgs(args)
 
@@ -45,7 +48,6 @@ func (b *messageBus) Publish(topic string, args ...interface{}) {
 	}
 }
 
-// Subscribe subscribes to the given topic
 func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	if reflect.TypeOf(fn).Kind() != reflect.Func {
 		return fmt.Errorf("%s is not a reflect.Func", reflect.TypeOf(fn))
@@ -84,7 +86,6 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 	return nil
 }
 
-// Unsubscribe unsubscribe handler from the given topic
 func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
@@ -107,7 +108,6 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	return fmt.Errorf("Topic %s doesn't exist", topic)
 }
 
-// Close unsubscribe all handlers from given topic
 func (b *messageBus) Close(topic string) {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
