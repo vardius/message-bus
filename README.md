@@ -79,6 +79,10 @@ func main() {
 }
 ```
 
+## Docker service
+
+1. [pubsub](https://github.com/vardius/pubsub) - gRPC message-oriented middleware on top of message-bus, event ingestion and delivery system.
+
 License
 -------
 
