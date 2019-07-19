@@ -73,9 +73,9 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 	b.mtx.Lock()
 	defer b.mtx.Unlock()
 
-	if _, ok := b.handlers[topic]; ok {
-		rv := reflect.ValueOf(fn)
+	rv := reflect.ValueOf(fn)
 
+	if _, ok := b.handlers[topic]; ok {
 		for i, h := range b.handlers[topic] {
 			if h.callback == rv {
 				close(h.queue)
