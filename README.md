@@ -25,6 +25,9 @@ HOW TO USE
 1. [GoDoc](http://godoc.org/github.com/vardius/message-bus)
 
 ## Benchmark
+
+Time Complexity of a `Publish` method is considered as `O(n)`. Where **n** corresponds to the number of *subscribers* for a given **topic**.
+
 **CPU: 3,3 GHz Intel Core i7**
 
 **RAM: 16 GB 2133 MHz LPDDR3**
@@ -33,16 +36,13 @@ HOW TO USE
 ➜  message-bus git:(master) ✗ go test -bench=. -cpu=4 -benchmem
 goos: darwin
 goarch: amd64
-BenchmarkBus-4                   3000000               534 ns/op              56 B/op          3 allocs/op
-BenchmarkBusParallel-4           5000000               313 ns/op              48 B/op          2 allocs/op
-BenchmarkBus100-4                 100000             14651 ns/op              56 B/op          3 allocs/op
-BenchmarkBus100Parallel-4         300000             14130 ns/op              48 B/op          2 allocs/op
-BenchmarkBus1000-4                 10000            159269 ns/op              56 B/op          3 allocs/op
-BenchmarkBus1000Parallel-4         10000            142578 ns/op              48 B/op          2 allocs/op
-BenchmarkBusNumCPU-4             1000000              1155 ns/op              56 B/op          3 allocs/op
-BenchmarkBusNumCPUParallel-4     2000000               774 ns/op              48 B/op          2 allocs/op
+pkg: github.com/vardius/message-bus
+BenchmarkOneSubscriberPerOneTopic-4                      2000000               692 ns/op             112 B/op          3 allocs/op
+BenchmarkOneSubscriberPerHundredTopics-4                 2000000               607 ns/op             112 B/op          3 allocs/op
+BenchmarkHundredSubscribersPerOneTopic-4                   50000             25777 ns/op             112 B/op          3 allocs/op
+BenchmarkHundredSubscribersPerHundredTopics-4              50000             27368 ns/op             112 B/op          3 allocs/op
 PASS
-ok      message-bus    23.125s
+ok      github.com/vardius/message-bus  29.978s
 ```
 
 ## Basic example
