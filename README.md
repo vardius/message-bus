@@ -27,7 +27,7 @@ HOW TO USE
 
 ## Benchmark
 
-Time Complexity of a `Publish` method is considered to be approximately as `O(n)`. Where **n** corresponds to the number of *subscribers* for a given **topic**.
+Time complexity of a `Publish` method is considered to be [linear time `O(n)`](https://en.wikipedia.org/wiki/Time_complexity#Linear_time). Where **n** corresponds to the number of *subscribers* for a given **topic**.
 
 **CPU: 3,3 GHz Intel Core i7**
 
