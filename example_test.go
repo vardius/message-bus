@@ -14,12 +14,12 @@ func Example() {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	bus.Subscribe("topic", func(v bool) {
+	_ = bus.Subscribe("topic", func(v bool) {
 		defer wg.Done()
 		fmt.Println("s1", v)
 	})
 
-	bus.Subscribe("topic", func(v bool) {
+	_ = bus.Subscribe("topic", func(v bool) {
 		defer wg.Done()
 		fmt.Println("s2", v)
 	})
@@ -44,7 +44,7 @@ func Example_second() {
 	bus := messagebus.New(queueSize)
 
 	for i := 0; i < subscribersAmount; i++ {
-		bus.Subscribe("topic", func(i int, out chan<- int) { out <- i })
+		_ = bus.Subscribe("topic", func(i int, out chan<- int) { out <- i })
 	}
 
 	go func() {

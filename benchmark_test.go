@@ -12,7 +12,7 @@ func BenchmarkPublish(b *testing.B) {
 	var wg sync.WaitGroup
 	wg.Add(b.N)
 
-	bus.Subscribe("topic", func() {
+	_ = bus.Subscribe("topic", func() {
 		wg.Done()
 	})
 
@@ -34,7 +34,7 @@ func BenchmarkSubscribe(b *testing.B) {
 
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
-			bus.Subscribe("topic", func() {})
+			_ = bus.Subscribe("topic", func() {})
 		}
 	})
 }
@@ -48,7 +48,7 @@ func benchmark(b *testing.B, subscribersCount, topicsCount int) {
 
 	for i := 0; i < topicsCount; i++ {
 		for j := 0; j < subscribersCount; j++ {
-			bus.Subscribe(strconv.Itoa(i), func() {
+			_ = bus.Subscribe(strconv.Itoa(i), func() {
 				wg.Done()
 			})
 		}

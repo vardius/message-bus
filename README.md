@@ -60,12 +60,12 @@ func main() {
     var wg sync.WaitGroup
     wg.Add(2)
 
-    bus.Subscribe("topic", func(v bool) {
+    _ = bus.Subscribe("topic", func(v bool) {
         defer wg.Done()
         fmt.Println(v)
     })
 
-    bus.Subscribe("topic", func(v bool) {
+    _ = bus.Subscribe("topic", func(v bool) {
         defer wg.Done()
         fmt.Println(v)
     })

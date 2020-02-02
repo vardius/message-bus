@@ -87,7 +87,7 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 		return nil
 	}
 
-	return fmt.Errorf("Topic %s doesn't exist", topic)
+	return fmt.Errorf("topic %s doesn't exist", topic)
 }
 
 func (b *messageBus) Close(topic string) {
