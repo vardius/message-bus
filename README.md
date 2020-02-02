@@ -38,12 +38,8 @@ Time complexity of a `Publish` method is considered to be [linear time `O(n)`](h
 goos: darwin
 goarch: amd64
 pkg: github.com/vardius/message-bus
-BenchmarkOneSubscriberPerOneTopic-4                      2000000               692 ns/op             112 B/op          3 allocs/op
-BenchmarkOneSubscriberPerHundredTopics-4                 2000000               607 ns/op             112 B/op          3 allocs/op
-BenchmarkHundredSubscribersPerOneTopic-4                   50000             25777 ns/op             112 B/op          3 allocs/op
-BenchmarkHundredSubscribersPerHundredTopics-4              50000             27368 ns/op             112 B/op          3 allocs/op
-PASS
-ok      github.com/vardius/message-bus  29.978s
+BenchmarkPublish-4                   	 4430224	       250 ns/op	       0 B/op	       0 allocs/op
+BenchmarkSubscribe-4                 	  598240	      2037 ns/op	     735 B/op	       5 allocs/op
 ```
 
 ## Basic example
@@ -52,6 +48,7 @@ package main
 
 import (
     "fmt"
+	"sync"
 
     "github.com/vardius/message-bus"
 )
