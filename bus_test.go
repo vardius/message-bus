@@ -33,14 +33,16 @@ func TestUnsubscribe(t *testing.T) {
 
 	handler := func() {}
 
-	bus.Subscribe("test", handler)
+	if err := bus.Subscribe("test", handler); err != nil {
+		t.Fatal(err)
+	}
 
 	if err := bus.Unsubscribe("test", handler); err != nil {
 		fmt.Println(err)
 		t.Fail()
 	}
 
-	if err := bus.Unsubscribe("unexisted", func() {}); err == nil {
+	if err := bus.Unsubscribe("non-existed", func() {}); err == nil {
 		fmt.Println(err)
 		t.Fail()
 	}
@@ -51,7 +53,9 @@ func TestClose(t *testing.T) {
 
 	handler := func() {}
 
-	bus.Subscribe("test", handler)
+	if err := bus.Subscribe("test", handler); err != nil {
+		t.Fatal(err)
+	}
 
 	original, ok := bus.(*messageBus)
 	if !ok {
@@ -81,15 +85,19 @@ func TestPublish(t *testing.T) {
 	first := false
 	second := false
 
-	bus.Subscribe("topic", func(v bool) {
+	if err := bus.Subscribe("topic", func(v bool) {
 		defer wg.Done()
 		first = v
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
-	bus.Subscribe("topic", func(v bool) {
+	if err := bus.Subscribe("topic", func(v bool) {
 		defer wg.Done()
 		second = v
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	bus.Publish("topic", true)
 
@@ -102,9 +110,11 @@ func TestPublish(t *testing.T) {
 
 func TestHandleError(t *testing.T) {
 	bus := New(runtime.NumCPU())
-	bus.Subscribe("topic", func(out chan<- error) {
+	if err := bus.Subscribe("topic", func(out chan<- error) {
 		out <- errors.New("I do throw error")
-	})
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	out := make(chan error)
 	defer close(out)
