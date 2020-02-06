@@ -7,9 +7,11 @@
 [![](https://godoc.org/github.com/vardius/message-bus?status.svg)](http://godoc.org/github.com/vardius/message-bus)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/vardius/message-bus/blob/master/LICENSE.md)
 
+<img align="right" height="180px" src="docs/img/logo.png" alt="logo" />
+
 Go simple async message bus.
 
-ABOUT
+📖 ABOUT
 ==================================================
 Contributors:
 
@@ -20,12 +22,16 @@ Want to contribute ? Feel free to send pull requests!
 Have problems, bugs, feature ideas?
 We are using the github [issue tracker](https://github.com/vardius/message-bus/issues) to manage them.
 
-HOW TO USE
+## 📚 Documentation
+
+For **documentation** (_including examples_), **visit [rafallorenz.com/message-bus](http://rafallorenz.com/message-bus)**
+
+For **GoDoc** reference, **visit [godoc.org/github.com/vardius/message-bus](http://godoc.org/github.com/vardius/message-bus)**
+
+🚏 HOW TO USE
 ==================================================
 
-1. [GoDoc](http://godoc.org/github.com/vardius/message-bus)
-
-## Benchmark
+## 🚅 Benchmark
 
 Time complexity of a `Publish` method is considered to be [linear time `O(n)`](https://en.wikipedia.org/wiki/Time_complexity#Linear_time). Where **n** corresponds to the number of *subscribers* for a given **topic**.
 
@@ -42,7 +48,7 @@ BenchmarkPublish-4                   	 4430224	       250 ns/op	       0 B/op	  
 BenchmarkSubscribe-4                 	  598240	      2037 ns/op	     735 B/op	       5 allocs/op
 ```
 
-## Basic example
+## 🏫 Basic example
 ```go
 package main
 
@@ -77,15 +83,13 @@ func main() {
 }
 ```
 
-## Docker service
+## 🐳 Docker service
 
-1. [pubsub](https://github.com/vardius/pubsub) - gRPC message-oriented middleware on top of message-bus, event ingestion and delivery system.
+[pubsub](https://github.com/vardius/pubsub) - gRPC message-oriented middleware on top of message-bus, event ingestion and delivery system.
 
-License
+📜 [License](LICENSE.md)
 -------
 
 This package is released under the MIT license. See the complete license in the package:
-
-[LICENSE](LICENSE.md)
 
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fvardius%2Fmessage-bus.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fvardius%2Fmessage-bus?ref=badge_large)
