@@ -54,7 +54,7 @@ package main
 
 import (
     "fmt"
-	"sync"
+    "sync"
 
     "github.com/vardius/message-bus"
 )
