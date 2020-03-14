@@ -5,7 +5,7 @@ sidebar_label: Basic example
 ---
 
 Publish block only when the buffer of one of the subscribers is full.
-Change the buffer size altering queueSize when creating new messagebus
+Change the buffer size altering queueSize when creating new message bus.
 
 ```go
 package main
