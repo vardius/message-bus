@@ -1,0 +1,7 @@
+{
+  "docs": {
+    "Quick Start": ["installation", "basic-example"],
+    "Use Cases": ["pubsub"],
+    "Benchmark": ["benchmark"]
+  }
+}

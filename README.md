@@ -33,12 +33,6 @@ For **GoDoc** reference, **visit [godoc.org/github.com/vardius/message-bus](http
 
 ## 🚅 Benchmark
 
-Time complexity of a `Publish` method is considered to be [linear time `O(n)`](https://en.wikipedia.org/wiki/Time_complexity#Linear_time). Where **n** corresponds to the number of *subscribers* for a given **topic**.
-
-**CPU: 3,3 GHz Intel Core i7**
-
-**RAM: 16 GB 2133 MHz LPDDR3**
-
 ```bash
 ➜  message-bus git:(master) ✗ go test -bench=. -cpu=4 -benchmem
 goos: darwin
@@ -48,44 +42,16 @@ BenchmarkPublish-4                   	 4430224	       250 ns/op	       0 B/op	  
 BenchmarkSubscribe-4                 	  598240	      2037 ns/op	     735 B/op	       5 allocs/op
 ```
 
-## 🏫 Basic example
-```go
-package main
+👉 **[Click here](https://rafallorenz.com/message-bus/docs/benchmark)** to see all benchmark results.
 
-import (
-    "fmt"
-	"sync"
+## Features
+- [Documentation](https://rafallorenz.com/message-bus/)
 
-    "github.com/vardius/message-bus"
-)
+🚏 HOW TO USE
+==================================================
 
-func main() {
-    queueSize := 100
-    bus := messagebus.New(queueSize)
-
-    var wg sync.WaitGroup
-    wg.Add(2)
-
-    _ = bus.Subscribe("topic", func(v bool) {
-        defer wg.Done()
-        fmt.Println(v)
-    })
-
-    _ = bus.Subscribe("topic", func(v bool) {
-        defer wg.Done()
-        fmt.Println(v)
-    })
-
-    // Publish block only when the buffer of one of the subscribers is full.
-    // change the buffer size altering queueSize when creating new messagebus
-    bus.Publish("topic", true)
-    wg.Wait()
-}
-```
-
-## 🐳 Docker service
-
-[pubsub](https://github.com/vardius/pubsub) - gRPC message-oriented middleware on top of message-bus, event ingestion and delivery system.
+- [Basic example](https://rafallorenz.com/message-bus/docs/basic-example)
+- [Pub/Sub](https://rafallorenz.com/message-bus/docs/pubsub)
 
 📜 [License](LICENSE.md)
 -------

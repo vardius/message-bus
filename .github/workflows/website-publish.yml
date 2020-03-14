@@ -1,0 +1,28 @@
+name: Publish website to GitHub Pages
+on:
+  # Trigger the workflow on push or pull request,
+  # but only for the master branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy Files
+        uses: actions/checkout@v2
+      - name: Setup Git
+        run: |
+          git config --global user.name "$GITHUB_ACTOR"
+          git config --global user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: install
+        run: cd website/src && yarn install
+      - name: build
+        run: cd website/src && yarn build
+      - name: Publish website
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cd website/src && GIT_USER="$GITHUB_ACTOR:$GITHUB_TOKEN" CURRENT_BRANCH=master yarn run publish-gh-pages
