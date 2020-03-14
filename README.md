@@ -7,7 +7,7 @@
 [![](https://godoc.org/github.com/vardius/message-bus?status.svg)](http://godoc.org/github.com/vardius/message-bus)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/vardius/message-bus/blob/master/LICENSE.md)
 
-<img align="right" height="180px" src="docs/img/logo.png" alt="logo" />
+<img align="right" height="180px" src="website/src/static/img/logo.png" alt="logo" />
 
 Go simple async message bus.
 
