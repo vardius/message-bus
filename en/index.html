@@ -1,0 +1,46 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>message-bus · Go simple async message bus</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="Go simple async message bus"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="message-bus · Go simple async message bus"/><meta property="og:type" content="website"/><meta property="og:url" content="https://rafallorenz.com//message-bus/"/><meta property="og:description" content="Go simple async message bus"/><meta property="og:image" content="https://rafallorenz.com//message-bus/img/undraw_online.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://rafallorenz.com//message-bus/img/undraw_tweetstorm.svg"/><link rel="shortcut icon" href="/message-bus/favicon/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/darcula.min.css"/><script>
+              (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+              (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+              m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+              })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+              ga('create', 'UA-42622274-2', 'auto');
+              ga('send', 'pageview');
+            </script><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/message-bus/js/scrollSpy.js"></script><link rel="stylesheet" href="/message-bus/css/main.css"/><script src="/message-bus/js/codetabs.js"></script></head><body><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/message-bus/"><img class="logo" src="/message-bus/img/logo.png" alt="message-bus"/><h2 class="headerTitleWithLogo">message-bus</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class=""><a href="/message-bus/docs/installation" target="_self">Docs</a></li><li class=""><a href="/message-bus/help" target="_self">Help</a></li><li class=""><a href="https://github.com/vardius/message-bus" target="_self">GitHub</a></li></ul></nav></div></header></div></div><div class="navPusher"><div><div class="homeContainer"><div class="homeSplashFade"><div class="wrapper homeWrapper"><div class="projectLogo"><img src="/message-bus/img/logo.png" alt="Project Logo"/></div><div class="inner"><h2 class="projectTitle">message-bus<small>Go simple async message bus</small></h2><div class="container codeSample"><div class="wrapper"><div><span><pre><code class="hljs css language-go"><span class="hljs-keyword">package</span> main
+
+<span class="hljs-keyword">import</span> (
+    <span class="hljs-string">"fmt"</span>
+    <span class="hljs-string">"sync"</span>
+
+    <span class="hljs-string">"github.com/vardius/message-bus"</span>
+)
+
+<span class="hljs-function"><span class="hljs-keyword">func</span> <span class="hljs-title">main</span><span class="hljs-params">()</span></span> {
+    queueSize := <span class="hljs-number">100</span>
+    bus := messagebus.New(queueSize)
+
+    <span class="hljs-keyword">var</span> wg sync.WaitGroup
+    wg.Add(<span class="hljs-number">2</span>)
+
+    _ = bus.Subscribe(<span class="hljs-string">"topic"</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(v <span class="hljs-keyword">bool</span>)</span></span> {
+        <span class="hljs-keyword">defer</span> wg.Done()
+        fmt.Println(v)
+    })
+
+    _ = bus.Subscribe(<span class="hljs-string">"topic"</span>, <span class="hljs-function"><span class="hljs-keyword">func</span><span class="hljs-params">(v <span class="hljs-keyword">bool</span>)</span></span> {
+        <span class="hljs-keyword">defer</span> wg.Done()
+        fmt.Println(v)
+    })
+
+    bus.Publish(<span class="hljs-string">"topic"</span>, <span class="hljs-literal">true</span>)
+    wg.Wait()
+}
+</code></pre>
+</span></div></div></div><div class="section promoSection"><div class="promoRow"><div class="pluginRowBlock"><div class="pluginWrapper buttonWrapper"><a class="button" href="/message-bus/docs/en/installation.html">Documentation</a></div><div class="pluginWrapper buttonWrapper"><a class="button" href="/message-bus/en/help">Help</a></div><div class="pluginWrapper buttonWrapper"><a class="button" href="https://github.com/vardius/message-bus">GitHub</a></div></div></div></div></div></div></div></div><div class="mainContainer"><div class="container darkBackground paddingBottom paddingTop"><div class="wrapper"><div class="gridBlock"><div class="blockElement twoByGridBlock"><div class="blockContent"><h2><div><span><p>Be production ready from day one</p>
+</span></div></h2><div><span><p>In modern cloud architecture, applications are decoupled into smaller, independent building blocks that are easier to develop, deploy and maintain.
+<strong>message-bus</strong> provide communication and coordination for these distributed applications.</p>
+<p><strong>message-bus</strong> can significantly simplify coding of decoupled applications, while improving performance, reliability and scalability.</p>
+</span></div></div></div><div class="blockElement twoByGridBlock"><div class="blockContent"><h2><div><span><p>Simplify development of event-driven microservices</p>
+</span></div></h2><div><span><p>Whether you’re just beginning your journey to event-driven asynchronous microservices or migrating an existing system,
+making your events accessible through messaging middleware is a critical early step.</p>
+</span></div></div></div></div></div></div></div></div><footer class="nav-footer" id="footer"><section class="sitemap"><a href="/message-bus/" class="nav-home"><img src="/message-bus/img/logo.png" alt="message-bus" width="66" height="58"/></a><div><h5>Docs</h5><a href="/message-bus/docs/en/installation.html">Documentation</a><a href="https://godoc.org/github.com/vardius/message-bus">GoDoc</a></div><div><h5>Community</h5><a href="https://github.com/sponsors/vardius">Support</a></div><div><h5>More</h5><a href="https://rafallorenz.com">rafallorenz.com</a><a href="https://github.com/vardius/message-bus">GitHub</a><a class="github-button" href="https://github.com/vardius/message-bus" data-icon="octicon-star" data-count-href="/vardius/message-bus/stargazers" data-show-count="true" data-count-aria-label="# stargazers on GitHub" aria-label="Star this project on GitHub">Star</a></div></section><section class="copyright">Copyright © 2020 Rafał Lorenz</section></footer></div></body></html>

@@ -1,0 +1,7 @@
+{
+    "name":"vardius/message-bus",
+    "short_name":"message-bus",
+    "theme_color":"#ffffff",
+    "background_color":"#ffffff",
+    "display":"standalone"
+}
