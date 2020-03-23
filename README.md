@@ -26,7 +26,7 @@ We are using the github [issue tracker](https://github.com/vardius/message-bus/i
 
 For **documentation** (_including examples_), **visit [rafallorenz.com/message-bus](http://rafallorenz.com/message-bus)**
 
-For **GoDoc** reference, **visit [pkg.go.dev/github.com/vardius/message-bus](https://pkg.go.dev/github.com/vardius/message-bus)**
+For **GoDoc** reference, **visit [pkg.go.dev](https://pkg.go.dev/github.com/vardius/message-bus)**
 
 🚏 HOW TO USE
 ==================================================
