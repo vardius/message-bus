@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/vardius/message-bus)](https://goreportcard.com/report/github.com/vardius/message-bus)
 [![codecov](https://codecov.io/gh/vardius/message-bus/branch/master/graph/badge.svg)](https://codecov.io/gh/vardius/message-bus)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fvardius%2Fmessage-bus.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fvardius%2Fmessage-bus?ref=badge_shield)
-[![](https://godoc.org/github.com/vardius/message-bus?status.svg)](http://godoc.org/github.com/vardius/message-bus)
+[![](https://godoc.org/github.com/vardius/message-bus?status.svg)](https://pkg.go.dev/github.com/vardius/message-bus)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/vardius/message-bus/blob/master/LICENSE.md)
 
 <img align="right" height="180px" src="website/src/static/img/logo.png" alt="logo" />
@@ -26,7 +26,7 @@ We are using the github [issue tracker](https://github.com/vardius/message-bus/i
 
 For **documentation** (_including examples_), **visit [rafallorenz.com/message-bus](http://rafallorenz.com/message-bus)**
 
-For **GoDoc** reference, **visit [godoc.org/github.com/vardius/message-bus](http://godoc.org/github.com/vardius/message-bus)**
+For **GoDoc** reference, **visit [pkg.go.dev/github.com/vardius/message-bus](https://pkg.go.dev/github.com/vardius/message-bus)**
 
 🚏 HOW TO USE
 ==================================================
