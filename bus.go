@@ -46,8 +46,8 @@ func (b *messageBus) Publish(topic string, args ...interface{}) {
 }
 
 func (b *messageBus) Subscribe(topic string, fn interface{}) error {
-	if reflect.TypeOf(fn).Kind() != reflect.Func {
-		return fmt.Errorf("%s is not a reflect.Func", reflect.TypeOf(fn))
+	if err := isValidHandler(fn); err != nil {
+		return err
 	}
 
 	h := &handler{
@@ -70,10 +70,14 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 }
 
 func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
-	b.mtx.Lock()
-	defer b.mtx.Unlock()
+	if err := isValidHandler(fn); err != nil {
+		return err
+	}
 
 	rv := reflect.ValueOf(fn)
+
+	b.mtx.Lock()
+	defer b.mtx.Unlock()
 
 	if _, ok := b.handlers[topic]; ok {
 		for i, h := range b.handlers[topic] {
@@ -103,6 +107,14 @@ func (b *messageBus) Close(topic string) {
 
 		return
 	}
+}
+
+func isValidHandler(fn interface{}) error {
+	if reflect.TypeOf(fn).Kind() != reflect.Func {
+		return fmt.Errorf("%s is not a reflect.Func", reflect.TypeOf(fn))
+	}
+
+	return nil
 }
 
 func buildHandlerArgs(args []interface{}) []reflect.Value {
