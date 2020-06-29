@@ -84,7 +84,11 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 			if h.callback == rv {
 				close(h.queue)
 
-				b.handlers[topic] = append(b.handlers[topic][:i], b.handlers[topic][i+1:]...)
+				if len(b.handlers[topic]) == 1 {
+					delete(b.handlers, topic)
+				} else {
+					b.handlers[topic] = append(b.handlers[topic][:i], b.handlers[topic][i+1:]...)
+				}
 			}
 		}
 
