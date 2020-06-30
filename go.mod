@@ -1,3 +1,3 @@
-module github.com/me2go/message-bus
+module github.com/vardius/message-bus
 
 go 1.12
