@@ -57,9 +57,7 @@ func (b *messageBus) Subscribe(topic string, fn interface{}) error {
 
 	go func() {
 		for args := range h.queue {
-			go func(targs []reflect.Value) {
-				h.callback.Call(targs)
-			}(args)
+			h.callback.Call(args)
 		}
 	}()
 
