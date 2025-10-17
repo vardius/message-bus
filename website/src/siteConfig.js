@@ -32,7 +32,7 @@ const siteConfig = {
 
   // Used for publishing and more
   projectName: "message-bus",
-  organizationName: "vardius",
+  organizationName: "taills",
   // For top-level user or org sites, the organization is still the same.
   // e.g., for the https://JoelMarcey.github.io site, it would be set like...
   //   organizationName: 'JoelMarcey'
@@ -42,7 +42,7 @@ const siteConfig = {
     { doc: "installation", label: "Docs" },
     { page: "help", label: "Help" },
     // { page: "users", label: "Users" },
-    { href: "https://github.com/vardius/message-bus", label: "GitHub" }
+    { href: "https://github.com/taills/message-bus", label: "GitHub" }
     // { blog: true, label: 'Blog'},
     // { languages: true },
     // { search: true }
@@ -110,7 +110,7 @@ const siteConfig = {
 
   // You may provide arbitrary config keys to be used as needed by your
   // template. For example, if you need your repo's URL...
-  repoUrl: "https://github.com/vardius/message-bus",
+  repoUrl: "https://github.com/taills/message-bus",
   gaTrackingId: "UA-42622274-2"
 };
 

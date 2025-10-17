@@ -22,7 +22,7 @@ import (
     "fmt"
     "sync"
 
-    messagebus "github.com/vardius/message-bus"
+    messagebus "github.com/taills/message-bus"
 )
 
 func main() {
@@ -116,7 +116,7 @@ class HomeSplash extends React.Component {
           <PromoSection>
             <Button href={docUrl("installation.html")}>Documentation</Button>
             <Button href={pageUrl("help")}>Help</Button>
-            <Button href="https://github.com/vardius/message-bus">GitHub</Button>
+            <Button href="https://github.com/taills/message-bus">GitHub</Button>
           </PromoSection>
         </div>
       </SplashContainer>

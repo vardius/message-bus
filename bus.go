@@ -81,7 +81,7 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 
 	if _, ok := b.handlers[topic]; ok {
 		for i, h := range b.handlers[topic] {
-			if h.callback == rv {
+			if h.callback.Pointer() == rv.Pointer() {
 				close(h.queue)
 
 				if len(b.handlers[topic]) == 1 {
@@ -89,10 +89,12 @@ func (b *messageBus) Unsubscribe(topic string, fn interface{}) error {
 				} else {
 					b.handlers[topic] = append(b.handlers[topic][:i], b.handlers[topic][i+1:]...)
 				}
+
+				return nil
 			}
 		}
 
-		return nil
+		return fmt.Errorf("handler not found for topic %s", topic)
 	}
 
 	return fmt.Errorf("topic %s doesn't exist", topic)

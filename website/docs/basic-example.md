@@ -14,7 +14,7 @@ import (
     "fmt"
     "sync"
 
-    messagebus "github.com/vardius/message-bus"
+    messagebus "github.com/taills/message-bus"
 )
 
 func main() {

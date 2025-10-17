@@ -28,12 +28,12 @@ function Help(props) {
     },
     {
       content:
-        "[Ask questions](https://github.com/vardius/message-bus/issues) about the documentation and project",
+        "[Ask questions](https://github.com/taills/message-bus/issues) about the documentation and project",
       title: "Join the community"
     },
     {
       content:
-        "Find out [what's new](https://github.com/vardius/message-bus/watchers) with this project",
+        "Find out [what's new](https://github.com/taills/message-bus/watchers) with this project",
       title: "Stay up to date"
     },
     {
@@ -43,7 +43,7 @@ function Help(props) {
     },
     {
       content:
-        "Contribute by [forking](https://github.com/vardius/message-bus/network/members) and improving this project",
+        "Contribute by [forking](https://github.com/taills/message-bus/network/members) and improving this project",
       title: "Contribute"
     }
   ];
