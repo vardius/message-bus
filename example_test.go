@@ -1,67 +1,107 @@
 package messagebus_test
 
 import (
+	"context"
 	"fmt"
-	"sync"
+	"time"
 
-	messagebus "github.com/vardius/message-bus"
+	messagebus "github.com/vardius/message-bus/v2"
 )
 
-func Example() {
-	queueSize := 100
-	bus := messagebus.New(queueSize)
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	_ = bus.Subscribe("topic", func(v bool) {
-		defer wg.Done()
-		fmt.Println("s1", v)
-	})
-
-	_ = bus.Subscribe("topic", func(v bool) {
-		defer wg.Done()
-		fmt.Println("s2", v)
-	})
-
-	// Publish block only when the buffer of one of the subscribers is full.
-	// change the buffer size altering queueSize when creating new messagebus
-	bus.Publish("topic", true)
-	wg.Wait()
-
-	// Unordered output:
-	// s1 true
-	// s2 true
+type OrderPlaced struct {
+	ID    int
+	Total int // cents
 }
 
-func Example_second() {
-	queueSize := 2
-	subscribersAmount := 3
+func Example() {
+	ctx := context.Background()
+	bus := messagebus.New[OrderPlaced](100)
 
-	ch := make(chan int, queueSize)
-	defer close(ch)
-
-	bus := messagebus.New(queueSize)
-
-	for i := 0; i < subscribersAmount; i++ {
-		_ = bus.Subscribe("topic", func(i int, out chan<- int) { out <- i })
+	_, err := bus.Subscribe("orders", func(e OrderPlaced) {
+		fmt.Printf("receipt for order %d: $%d.%02d\n", e.ID, e.Total/100, e.Total%100)
+	})
+	if err != nil {
+		panic(err)
 	}
 
-	go func() {
-		for n := 0; n < queueSize; n++ {
-			bus.Publish("topic", n, ch)
-		}
-	}()
-
-	var sum = 0
-	for sum < (subscribersAmount * queueSize) {
-		select {
-		case <-ch:
-			sum++
-		}
+	if err := bus.Publish(ctx, "orders", OrderPlaced{ID: 7, Total: 1250}); err != nil {
+		panic(err)
 	}
 
-	fmt.Println(sum)
+	// Close waits for the handler to finish.
+	if err := bus.Close(ctx); err != nil {
+		panic(err)
+	}
+	// Output: receipt for order 7: $12.50
+}
+
+func ExampleBus_Subscribe() {
+	ctx := context.Background()
+	bus := messagebus.New[int](10)
+
+	unsubscribe, err := bus.Subscribe("ticks", func(n int) { fmt.Println("tick", n) })
+	if err != nil {
+		panic(err)
+	}
+
+	_ = bus.Publish(ctx, "ticks", 1)
+	_ = bus.Publish(ctx, "ticks", 2)
+	unsubscribe()                    // 1 and 2 are already queued, so they are still handled
+	_ = bus.Publish(ctx, "ticks", 3) // no subscribers left: dropped
+
+	_ = bus.Close(ctx)
 	// Output:
-	// 6
+	// tick 1
+	// tick 2
+}
+
+func ExampleBus_Publish() {
+	ctx := context.Background()
+	bus := messagebus.New[string](1)
+
+	release := make(chan struct{})
+	_, _ = bus.Subscribe("jobs", func(job string) {
+		<-release
+		fmt.Println("done", job)
+	})
+
+	_ = bus.Publish(ctx, "jobs", "a") // the handler takes a, and waits
+	_ = bus.Publish(ctx, "jobs", "b") // b fills the queue
+
+	// No room for c: give up after 10ms.
+	timeout, cancel := context.WithTimeout(ctx, 10*time.Millisecond)
+	defer cancel()
+	err := bus.Publish(timeout, "jobs", "c")
+	fmt.Println(err)
+
+	close(release)
+	_ = bus.Close(ctx)
+	// Output:
+	// messagebus: publish to "jobs": context deadline exceeded
+	// done a
+	// done b
+}
+
+func ExampleBus_Close() {
+	ctx := context.Background()
+	bus := messagebus.New[string](10)
+
+	_, _ = bus.Subscribe("emails", func(to string) { fmt.Println("sent to", to) })
+	for _, to := range []string{"ana", "ben", "cy"} {
+		_ = bus.Publish(ctx, "emails", to)
+	}
+
+	// Stop the publishers first, then Close: it returns once every queued message has been handled.
+	shutdown, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	if err := bus.Close(shutdown); err != nil {
+		fmt.Println("some emails weren't sent:", err)
+	}
+
+	fmt.Println(bus.Publish(ctx, "emails", "dee"))
+	// Output:
+	// sent to ana
+	// sent to ben
+	// sent to cy
+	// messagebus: bus closed
 }

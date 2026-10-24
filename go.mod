@@ -1,3 +1,3 @@
-module github.com/vardius/message-bus
+module github.com/vardius/message-bus/v2
 
-go 1.12
+go 1.26.0
