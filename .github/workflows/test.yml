@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go: ['1.26.x', '1.27.x']
+    env:
+      STATICCHECK: honnef.co/go/tools/cmd/staticcheck@v0.8.2
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - run: go vet ./...
+      - name: Staticcheck
+        run: go run "$STATICCHECK" ./...
+      - name: Test
+        run: go test -race -shuffle=on ./...
+      # The race detector changes allocation counts, so the allocation guards skip under it: run them here.
+      - name: Allocation guards
+        run: go test -run Allocations -count 1 ./...
+      - name: Benchmarks compile and run once
+        run: go test -run '^$' -bench . -benchtime 1x ./...
