@@ -1,0 +1,71 @@
+---
+title: Benchmarks
+description: What publishing and subscribing cost, how v2 compares with v1, and how to measure it yourself.
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import BenchmarkChart from '../../components/BenchmarkChart.astro';
+import BenchmarkSuite from '../../components/BenchmarkSuite.astro';
+import { comparison, suite } from '../../data/benchmarks';
+
+These numbers measure the bus alone. Handlers only count what they get, or in v2's own suite do nothing with it,
+so what's left is the cost of queueing
+each message, waking the handlers' goroutines, and waiting for room when they fall behind. Queues hold 1024
+messages. Your handlers will dominate a real program; the point is that the bus adds as little as possible.
+
+## v2 against v1
+
+Both versions ran on the same harness, with the same handlers and queue sizes. A "16 publishers" scenario
+publishes from 16 goroutines at once. There, and in the suite's Parallel rows, the time is wall time per call
+across all of them, so it measures throughput.
+
+<Tabs syncKey="bench">
+<TabItem label="One publisher">
+<BenchmarkChart title="Time per call to Publish" rows={comparison.publish} />
+</TabItem>
+<TabItem label="16 publishers">
+<BenchmarkChart title="Time per call to Publish, 16 goroutines at once" rows={comparison.parallel} />
+</TabItem>
+<TabItem label="Subscribe">
+<BenchmarkChart title="Time per subscription" rows={comparison.subscribe} />
+</TabItem>
+</Tabs>
+
+v1 boxed every argument and called handlers through reflection, at two allocations per Publish; v2 copies the
+message into each queue and calls the handler directly, allocating nothing. v1 held one lock for the whole bus
+while it published; v2 spreads topics over 64 locks by their hash, which is where most of the gain with many
+publishers comes from.
+
+With many subscribers, most of the time goes to the Go scheduler: each Publish wakes every subscriber's goroutine
+that was waiting for a message. Both versions pay that.
+
+## v2's own suite
+
+<BenchmarkSuite rows={suite} />
+
+<Aside title="Why 64 locks">
+Publish takes a read lock on its topic's shard while it queues the message, so that unsubscribing and closing can
+tell when no publisher can still send to a queue. That is what lets Close promise that every queued message is
+handled. With one lock for the whole bus, every Publish touches the same lock word, and 16 goroutines publishing
+to 100 topics queue for it; spread over 64 locks, they take {comparison.parallel[1].after.ns} ns. In prototypes,
+a bus that took no lock at all was faster there, but couldn't keep that promise, and its handlers, which had to
+watch a second channel, made a single publisher slower.
+</Aside>
+
+## Run them yourself
+
+From a clone of the repository:
+
+```sh
+go test -run '^$' -bench . -benchmem
+```
+
+To compare two versions, run each a few times and compare with [benchstat](https://pkg.go.dev/golang.org/x/perf/cmd/benchstat):
+
+```sh
+go test -run '^$' -bench . -count 10 > new.txt
+benchstat old.txt new.txt
+```
+
+The allocation counts are also enforced by tests: `TestAllocations` fails if Publish allocates while there is
+room, or while it waits with a context that can't be cancelled.

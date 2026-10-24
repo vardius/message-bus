@@ -1,0 +1,74 @@
+---
+title: Getting started
+description: Install message-bus, publish orders to two handlers, and see what a bus does with each message.
+---
+
+import { Aside, Code, LinkCard, CardGrid, Steps } from '@astrojs/starlight/components';
+import events from '../../../../examples/events/main.go?raw';
+
+message-bus delivers messages between the parts of one Go program. A part publishes a message to a topic;
+every part subscribed to that topic gets it, on a goroutine of its own, without the publisher knowing who they are.
+
+- **Publish** puts a message in the queue of every subscriber of a topic, and returns.
+- **Subscribe** runs a handler for every message on a topic, one at a time, in order.
+- **Close** waits until every queued message has been handled, then shuts the bus down.
+
+## Install
+
+message-bus needs Go 1.26 or newer.
+
+```sh
+go get github.com/vardius/message-bus/v2
+```
+
+## Your first bus
+
+This program publishes three orders. One handler writes a receipt for each; another takes what was ordered
+out of stock. Neither knows about the other, and the code that publishes knows about neither:
+
+<Code code={events} lang="go" title="examples/events/main.go" />
+
+## Run it
+
+<Steps>
+
+1. From a clone of the repository:
+
+   ```sh
+   go run ./examples/events
+   ```
+
+   ```txt
+   order 1: 2 × tea
+   order 2: 1 × cake
+   order 3: 3 × tea
+   left: map[cake:3 tea:5]
+   ```
+
+2. Add a fourth order to `orders` in `main` and run it again. The receipts stay in the order the orders were
+   published, because each subscriber handles its messages one at a time.
+
+</Steps>
+
+## What just happened
+
+- `messagebus.New[OrderPlaced](100)` made a bus for `OrderPlaced` messages. Each subscriber gets a queue of
+  100 of them.
+- Each `Subscribe` started a goroutine that waits for messages on `"orders"` and calls its handler with each one.
+- `Publish` copied the order into both queues and returned at once: it waits for room, never for handlers.
+- `Close` ended both subscriptions, and returned once both handlers had handled every order. Only then is
+  `stock` safe to read from `main`.
+
+<Aside title="Within one program">
+message-bus doesn't cross process boundaries. [pubsub](https://github.com/vardius/pubsub) is a gRPC server,
+built on message-bus v1, that delivers published events to subscribed clients over the network.
+</Aside>
+
+## Next steps
+
+<CardGrid>
+	<LinkCard title="Publishing" href="../publishing/" description="Order, full queues, contexts and errors." />
+	<LinkCard title="Subscribing" href="../subscribing/" description="Handlers, their goroutines, and unsubscribing." />
+	<LinkCard title="Closing" href="../closing/" description="Shut down without losing a queued message." />
+	<LinkCard title="Benchmarks" href="../benchmarks/" description="What each call costs, and how v2 compares with v1." />
+</CardGrid>

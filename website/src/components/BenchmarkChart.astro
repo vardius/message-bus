@@ -1,0 +1,328 @@
+---
+// Horizontal bars of the old version against the new, with a table twin for screen readers and exact values.
+import { environment, versions, type Comparison } from '../data/benchmarks';
+
+interface Props {
+	title: string;
+	rows: Comparison[];
+}
+
+const { title, rows } = Astro.props;
+const max = Math.max(...rows.flatMap((r) => [r.before.ns, r.after.ns]));
+const allocs = (n: number) => `${n} ${n === 1 ? 'alloc' : 'allocs'}`;
+const ratio = (r: Comparison) => r.before.ns / r.after.ns;
+const ns = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(2)} µs` : `${n.toFixed(1)} ns`);
+const sides = [
+	{ key: 'before', label: versions.before },
+	{ key: 'after', label: versions.after },
+] as const;
+---
+
+<figure class="bench not-content">
+	<figcaption>
+		<span class="bench-title">{title}, lower is better</span>
+		<ul class="bench-legend" aria-hidden="true">
+			{
+				sides.map((s) => (
+					<li>
+						<span class={`swatch ${s.key}`} />
+						{s.label}
+					</li>
+				))
+			}
+		</ul>
+	</figcaption>
+
+	<div class="bench-rows" aria-hidden="true">
+		{
+			rows.map((r) => (
+				<div class="bench-row">
+					<div class="bench-label">
+						{r.scenario}
+						{ratio(r) >= 1.5 && <span class="bench-delta">{ratio(r).toFixed(1)}× faster</span>}
+					</div>
+					<div class="bench-bars">
+						{sides.map((s) => (
+							<div
+								class="bench-bar-line"
+								tabindex="-1"
+								data-tip={`${s.label} · ${r.scenario}: ${ns(r[s.key].ns)}, ${allocs(r[s.key].allocs)}`}
+							>
+								<span class={`bench-bar ${s.key}`} style={`--f: ${r[s.key].ns / max}`} />
+								<span class={`bench-value ${s.key}`}>{ns(r[s.key].ns)}</span>
+							</div>
+						))}
+					</div>
+				</div>
+			))
+		}
+	</div>
+	<div class="bench-tip" role="presentation" hidden></div>
+
+	<details class="bench-table">
+		<summary>Show as a table</summary>
+		<div class="bench-table-scroll">
+			<table>
+				<caption class="sr-only">{title}: time and allocations, {versions.before} against {versions.after}</caption>
+				<thead>
+					<tr>
+						<th scope="col">Scenario</th>
+						{sides.map((s) => <th scope="col">{s.label}</th>)}
+					</tr>
+				</thead>
+				<tbody>
+					{
+						rows.map((r) => (
+							<tr>
+								<th scope="row">{r.scenario}</th>
+								{sides.map((s) => (
+									<td>
+										{ns(r[s.key].ns)}
+										<span class="bench-allocs">{allocs(r[s.key].allocs)}</span>
+									</td>
+								))}
+							</tr>
+						))
+					}
+				</tbody>
+			</table>
+		</div>
+	</details>
+	<p class="bench-note">{environment}.</p>
+</figure>
+
+<style>
+	.bench {
+		position: relative;
+		margin: 1rem 0 0;
+		padding: 1rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.75rem;
+		background: var(--sl-color-bg);
+	}
+
+	figcaption {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1rem;
+		align-items: baseline;
+		justify-content: space-between;
+		margin-bottom: 1rem;
+	}
+
+	.bench-title {
+		color: var(--sl-color-white);
+		font-weight: 600;
+	}
+
+	.bench-legend {
+		display: flex;
+		gap: 1rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-sm);
+	}
+
+	.bench-legend li {
+		display: flex;
+		gap: 0.375rem;
+		align-items: center;
+	}
+
+	.swatch {
+		width: 0.75rem;
+		height: 0.75rem;
+		border-radius: 2px;
+	}
+
+	.swatch.before,
+	.bench-bar.before {
+		background: var(--chart-before);
+	}
+
+	.swatch.after,
+	.bench-bar.after {
+		background: var(--chart-after);
+	}
+
+	.bench-rows {
+		display: grid;
+		gap: 0.875rem;
+	}
+
+	.bench-row {
+		display: grid;
+		gap: 0.25rem 1rem;
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	@media (min-width: 40rem) {
+		.bench-row {
+			grid-template-columns: 12rem minmax(0, 1fr);
+			align-items: center;
+		}
+	}
+
+	.bench-label {
+		color: var(--sl-color-gray-2);
+		font-size: var(--sl-text-sm);
+		line-height: 1.3;
+		overflow-wrap: anywhere;
+	}
+
+	.bench-delta {
+		display: block;
+		color: var(--sl-color-text-accent);
+		font-size: var(--sl-text-xs);
+		font-weight: 600;
+	}
+
+	.bench-bars {
+		display: grid;
+		gap: 2px;
+		padding-left: 0;
+		border-left: 1px solid var(--chart-grid);
+	}
+
+	.bench-bar-line {
+		display: flex;
+		gap: 0.375rem;
+		align-items: center;
+		min-height: 1.25rem;
+		cursor: default;
+		outline: none;
+	}
+
+	/* Leave room for the value label after the longest bar. */
+	.bench-bar {
+		flex: none;
+		width: calc((100% - 5.5em) * var(--f));
+		min-width: 2px;
+		height: 0.625rem;
+		border-radius: 0 4px 4px 0;
+	}
+
+	.bench-bar-line:hover .bench-bar,
+	.bench-bar-line.active .bench-bar {
+		filter: brightness(1.15);
+	}
+
+	.bench-value {
+		flex: none;
+		font-size: var(--sl-text-xs);
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.bench-value.before {
+		color: var(--sl-color-gray-3);
+	}
+
+	.bench-value.after {
+		color: var(--sl-color-white);
+		font-weight: 600;
+	}
+
+	.bench-tip {
+		position: absolute;
+		z-index: 2;
+		max-width: min(18rem, calc(100% - 2rem));
+		padding: 0.375rem 0.625rem;
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.375rem;
+		background: var(--sl-color-gray-6);
+		box-shadow: var(--sl-shadow-md);
+		color: var(--sl-color-white);
+		font-size: var(--sl-text-xs);
+		pointer-events: none;
+	}
+
+	.bench-table {
+		margin-top: 1rem;
+		font-size: var(--sl-text-sm);
+	}
+
+	.bench-table summary {
+		width: fit-content;
+		color: var(--sl-color-text-accent);
+		cursor: pointer;
+	}
+
+	.bench-table-scroll {
+		margin-top: 0.75rem;
+		overflow-x: auto;
+	}
+
+	.bench-table table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	.bench-table th,
+	.bench-table td {
+		padding: 0.375rem 0.5rem;
+		border-bottom: 1px solid var(--sl-color-hairline-light);
+		text-align: left;
+		vertical-align: top;
+	}
+
+	.bench-table td {
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.bench-allocs {
+		display: block;
+		color: var(--sl-color-gray-3);
+		font-size: var(--sl-text-xs);
+	}
+
+	.bench-note {
+		margin: 0.75rem 0 0;
+		color: var(--sl-color-gray-3);
+		font-size: var(--sl-text-xs);
+	}
+
+	@media (forced-colors: active) {
+		.bench-bar.before {
+			background: GrayText;
+		}
+
+		.bench-bar.after {
+			background: Highlight;
+		}
+	}
+</style>
+
+<script>
+	// Hover adds allocations to the value already shown. The same numbers are in the table, so nothing depends on it.
+	for (const figure of document.querySelectorAll<HTMLElement>('.bench')) {
+		const tip = figure.querySelector<HTMLElement>('.bench-tip')!;
+		let active: HTMLElement | null = null;
+
+		const show = (line: HTMLElement) => {
+			active?.classList.remove('active');
+			active = line;
+			line.classList.add('active');
+			tip.textContent = line.dataset.tip ?? '';
+			tip.hidden = false;
+			const box = figure.getBoundingClientRect();
+			const bar = line.getBoundingClientRect();
+			const left = Math.min(bar.left - box.left, box.width - tip.offsetWidth - 8);
+			tip.style.left = `${Math.max(8, left)}px`;
+			tip.style.top = `${bar.top - box.top - tip.offsetHeight - 6}px`;
+		};
+		const hide = () => {
+			active?.classList.remove('active');
+			active = null;
+			tip.hidden = true;
+		};
+
+		for (const line of figure.querySelectorAll<HTMLElement>('.bench-bar-line')) {
+			line.addEventListener('pointerenter', () => show(line));
+			line.addEventListener('pointerleave', hide);
+		}
+	}
+</script>

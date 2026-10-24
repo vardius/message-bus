@@ -1,0 +1,87 @@
+---
+title: Publishing
+description: How Publish queues a message for every subscriber, in what order, and what it does when a queue is full.
+---
+
+import { Aside, Code } from '@astrojs/starlight/components';
+import example from '../../../../examples/backpressure/main.go?raw';
+
+```go
+func (b *Bus[T]) Publish(ctx context.Context, topic string, msg T) error
+```
+
+Publish puts `msg` in the queue of every subscriber of `topic`, in the order they subscribed, and returns.
+It doesn't wait for the handlers: they take the message from their queues on their own goroutines.
+
+```go
+err := bus.Publish(ctx, "orders", OrderPlaced{ID: 7, Total: 1250})
+```
+
+A topic is any string, and needs no setup: it exists while it has subscribers. A message published to a topic
+nobody subscribes to is dropped, and Publish returns nil.
+
+## Order
+
+Each subscriber gets its messages in the order its queue took them. So messages you publish from one goroutine
+arrive in the order you published them, at every subscriber.
+
+Messages from goroutines publishing at the same time have no order between them, and can arrive in a different
+order at different subscribers. If two messages must stay in order, publish them from the same goroutine.
+
+## When a queue is full
+
+Every subscriber has a queue of the size you gave `New`. A handler that falls behind fills it, and then Publish
+waits for room: until the handler takes a message, the subscriber unsubscribes, or `ctx` is done.
+
+While it waits, Publish holds no lock. Publishing to other topics, subscribing, unsubscribing and closing all
+carry on; only this call waits, and the subscribers after the full one get the message once it fits.
+
+`ctx` bounds the wait. When it is done, Publish returns its error, wrapped, and gives up on this message for
+the full subscriber and the ones after it; the ones before already have it.
+
+```go
+ctx, cancel := context.WithTimeout(ctx, 50*time.Millisecond)
+defer cancel()
+
+err := bus.Publish(ctx, "jobs", job)
+if errors.Is(err, context.DeadlineExceeded) {
+	// a subscriber is behind: drop the job, or try again later
+}
+```
+
+Publish looks at `ctx` only when it has to wait. A message that fits in every queue is queued even if `ctx` is
+already done.
+
+<Aside type="caution" title="Publishing from a handler">
+A handler that publishes to its own topic and finds its own queue full waits for room that only it can make.
+Give that Publish a context with a deadline, or the bus a bigger queue.
+</Aside>
+
+## Unbuffered queues
+
+`messagebus.New[T](0)` gives every subscriber a queue with no room: Publish hands each message straight to the
+handler, and waits whenever the handler is busy. Use it when the publisher should never get ahead of the slowest
+subscriber.
+
+## Errors
+
+| Error | When |
+| --- | --- |
+| `nil` | Every subscriber's queue took the message, apart from any that unsubscribed while Publish waited for it. Also when the topic has no subscribers. |
+| `ctx`'s error, wrapped | `ctx` was done while a queue was full. Check with `errors.Is(err, context.DeadlineExceeded)`. |
+| `ErrClosed` | `Close` was called before the call, or while it waited for room and before every queue had the message. The queues that took it still have it handled. |
+
+## Example: skipping work when a handler falls behind
+
+This program publishes jobs faster than its handler takes them. Each Publish waits at most 30ms for room,
+then skips the job:
+
+<Code code={example} lang="go" title="examples/backpressure/main.go" />
+
+```txt
+done 1
+skipped [4 5 6 8]
+done 2
+done 3
+done 7
+```

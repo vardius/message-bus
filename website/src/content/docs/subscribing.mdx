@@ -1,0 +1,115 @@
+---
+title: Subscribing
+description: Run a handler for every message on a topic, on its own goroutine and in order, and unsubscribe with the func Subscribe returns.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+```go
+func (b *Bus[T]) Subscribe(topic string, fn func(T)) (unsubscribe func(), err error)
+```
+
+Subscribe calls `fn` with every message published to `topic` from now on. Each subscription has its own queue
+and its own goroutine, which takes the messages from the queue one at a time and calls `fn` with each.
+
+```go
+unsubscribe, err := bus.Subscribe("orders", func(e OrderPlaced) {
+	sendReceipt(e)
+})
+if err != nil {
+	return err // the bus is closed
+}
+defer unsubscribe()
+```
+
+The only error is `ErrClosed`, after `Close`. A nil `fn` panics.
+
+## What a handler can count on
+
+- **One message at a time.** A handler is never called twice at once, so state only it touches needs no lock.
+- **In order.** It gets messages in the order its queue took them: the order they were published,
+  for messages published from one goroutine.
+- **Its own pace.** Handlers don't wait for each other. A slow handler delays the messages in its own queue,
+  and, once that queue is full, each Publish that waits for room in it, with its message to the subscribers
+  after it.
+
+Every subscription gets its own copy of the message. For a large message, publish a pointer, and treat what
+it points to as read-only: every handler gets the same pointer.
+
+## Message types
+
+A bus carries one type. To carry several kinds of message, use a bus for each, or an interface that all of them
+implement, and switch on the type in the handler:
+
+```go
+type Event interface{ event() }
+
+bus := messagebus.New[Event](100)
+_, err := bus.Subscribe("users", func(e Event) {
+	switch e := e.(type) {
+	case UserCreated:
+		welcome(e)
+	case UserDeleted:
+		cleanUp(e)
+	}
+})
+```
+
+## Unsubscribing
+
+The `unsubscribe` func Subscribe returns ends that subscription and no other, even if the same handler is
+subscribed more than once. Calling it again does nothing.
+
+Messages already in the subscription's queue are still handled; then its goroutine ends. Messages published
+after `unsubscribe` returns don't reach it. `unsubscribe` doesn't wait for the queue to empty, so a handler can
+unsubscribe itself:
+
+```go
+// Record the first 10 samples, then stop.
+ready := make(chan struct{})
+var unsubscribe func()
+recorded := 0
+unsubscribe, err := bus.Subscribe("samples", func(s Sample) {
+	<-ready // unsubscribe is set
+	if recorded == 10 {
+		return // queued before unsubscribe
+	}
+	record(s)
+	if recorded++; recorded == 10 {
+		unsubscribe()
+	}
+})
+close(ready)
+```
+
+The handler still gets what was already queued when it unsubscribed, so it checks its count first.
+
+To wait until a subscription's handler has finished, use `Close`.
+
+## Rules for handlers
+
+<Aside type="caution" title="Don't wait for yourself">
+- **Close** waits for every handler, including the one that calls it. Called from a handler, it returns only when
+  its context is done.
+- **Publish to your own topic** waits for room when your own queue is full, and only you make room.
+  Give that Publish a context with a deadline.
+</Aside>
+
+A handler that panics crashes the program, like a panic on any goroutine. If a handler can panic, recover in it:
+
+```go
+bus.Subscribe("orders", func(e OrderPlaced) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("order %d: %v", e.ID, r)
+		}
+	}()
+	sendReceipt(e)
+})
+```
+
+A handler that calls `runtime.Goexit`, as `t.FailNow` does in a test, ends only that call: the subscription
+carries on with its next message, on a new goroutine.
+
+A handler can subscribe, unsubscribe and publish to other topics freely: none of them waits on a lock that a
+waiting Publish holds.

@@ -1,0 +1,63 @@
+---
+title: Closing
+description: Shut a bus down without losing a queued message, with a deadline, after the publishers have stopped.
+---
+
+import { Aside, Code } from '@astrojs/starlight/components';
+import example from '../../../../examples/shutdown/main.go?raw';
+
+```go
+func (b *Bus[T]) Close(ctx context.Context) error
+```
+
+Close shuts the bus down and waits for its handlers:
+
+1. Every subscription ends, and Publish and Subscribe return `ErrClosed` from then on.
+2. Publish calls waiting for room in a full queue give up and return `ErrClosed`.
+3. The handlers carry on until every message already queued has been handled, and Close returns when the last
+   of them does, including subscriptions that were unsubscribed earlier and are still emptying their queues.
+
+```go
+if err := bus.Close(ctx); err != nil {
+	log.Printf("not every message was handled: %v", err)
+}
+```
+
+A message that Publish put in a queue is always handled, unless the program exits first.
+
+## Stop publishing first
+
+Close makes later Publish calls fail; it can't wait for calls that haven't been made yet. A Publish running at
+the same moment as Close may reach the queues or may return `ErrClosed`. So stop whatever publishes, then close:
+an HTTP server with `Shutdown`, a worker by cancelling its context and waiting for it.
+
+```go
+srv.Shutdown(ctx) // no more requests, so nothing publishes
+bus.Close(ctx)    // then wait for what was published
+```
+
+## Deadlines
+
+If `ctx` is done before the handlers finish, Close returns its error, wrapped. The bus stays closed and the
+handlers carry on with the queued messages in the background. Close can be called again, from anywhere, and each
+call waits in the same way:
+
+```go
+ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+defer cancel()
+if err := bus.Close(ctx); errors.Is(err, context.DeadlineExceeded) {
+	// some handlers are still busy
+}
+```
+
+<Aside type="caution" title="Not from a handler">
+Close waits for every handler, the one that calls it included, so from a handler it returns only when its
+context is done. Close the bus from the code that owns it.
+</Aside>
+
+## Example: a graceful shutdown
+
+This server publishes an event for every signup. On Ctrl-C it stops taking requests, then waits for the welcome
+emails already queued, within one 10-second deadline:
+
+<Code code={example} lang="go" title="examples/shutdown/main.go" />

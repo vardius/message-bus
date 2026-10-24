@@ -1,0 +1,141 @@
+---
+title: A typed message bus for Go
+description: Publish typed messages to topics within one Go program. Every subscriber handles them in order on its own goroutine; Publish allocates nothing while there is room, and never holds a lock while it waits.
+template: splash
+hero:
+  title: One message, <span class="accent">every</span> subscriber
+  tagline: Publish typed messages to topics within one Go program. Each subscriber handles them in order on a goroutine of its own, Publish waits for room without holding a lock, and Close waits until every message is handled.
+  actions:
+    - text: Get started
+      link: getting-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/vardius/message-bus
+      icon: github
+      variant: minimal
+---
+
+import { CardGrid, Card, LinkButton, LinkCard, Tabs, TabItem } from '@astrojs/starlight/components';
+import BenchmarkChart from '../../components/BenchmarkChart.astro';
+import Stats from '../../components/Stats.astro';
+import { comparison } from '../../data/benchmarks';
+
+<Stats />
+
+<div class="landing-section">
+
+<p class="eyebrow">Features</p>
+
+## What you get
+
+<CardGrid>
+	<Card title="Typed messages" icon="approve-check">
+		A `Bus[T]` carries one message type and handlers are `func(T)`. No reflection, no `interface{}`: a
+		handler that doesn't fit is a compile error.
+	</Card>
+	<Card title="In order, in parallel" icon="list-format">
+		Each subscriber has its own queue and goroutine, and handles its messages one at a time, in the order
+		they were queued.
+	</Card>
+	<Card title="Bounded waits" icon="clock">
+		When a queue is full, Publish waits for room without holding a lock, and gives up when its context is
+		done. The rest of the bus carries on.
+	</Card>
+	<Card title="Unsubscribe with a handle" icon="close">
+		Subscribe returns the func that ends that subscription, and only that one. A handler can call it to
+		unsubscribe itself.
+	</Card>
+	<Card title="Graceful shutdown" icon="approve-check-circle">
+		Close waits until every queued message has been handled, or its context is done. A message Publish
+		queued is never dropped.
+	</Card>
+	<Card title="Lean" icon="rocket">
+		Publish allocates nothing while there is room, and tests guard the allocation counts. No dependencies
+		beyond the standard library.
+	</Card>
+</CardGrid>
+
+</div>
+
+<div class="landing-section">
+
+<p class="eyebrow">Performance</p>
+
+## Faster than v1, without an allocation
+
+<div class="landing-lead">
+	v2 calls handlers directly instead of through reflection, and spreads topics over 64 locks, so publishers
+	to different topics rarely meet. Publishing to one subscriber went from {comparison.publish[0].before.ns} ns
+	to {comparison.publish[0].after.ns} ns. With 16 publishers at once, the time is wall time per call across
+	all of them, so it measures throughput.
+</div>
+
+<Tabs syncKey="bench">
+<TabItem label="One publisher">
+<BenchmarkChart title="Time per call to Publish" rows={comparison.publish} />
+</TabItem>
+<TabItem label="16 publishers">
+<BenchmarkChart title="Time per call to Publish, 16 goroutines at once" rows={comparison.parallel} />
+</TabItem>
+<TabItem label="Subscribe">
+<BenchmarkChart title="Time per subscription" rows={comparison.subscribe} />
+</TabItem>
+</Tabs>
+
+<LinkCard title="How these were measured" href="benchmarks/" description="Methodology, the full v2 suite, and how to run it yourself." />
+
+</div>
+
+<div class="landing-section">
+
+<p class="eyebrow">Upgrading</p>
+
+## Coming from v1
+
+<div class="landing-lead">
+	The idea is the same: publish to a topic, and every subscriber gets the message. The bus is typed now,
+	Subscribe hands back a func to unsubscribe with, and Publish takes a context.
+</div>
+
+<div class="compare">
+
+```go title="v1"
+bus := messagebus.New(100)
+
+handler := func(e OrderPlaced) {
+	sendReceipt(e)
+}
+bus.Subscribe("orders", handler)
+bus.Publish("orders", OrderPlaced{ID: 7})
+
+bus.Unsubscribe("orders", handler)
+```
+
+```go title="v2"
+bus := messagebus.New[OrderPlaced](100)
+
+unsubscribe, err := bus.Subscribe("orders",
+	func(e OrderPlaced) {
+		sendReceipt(e)
+	},
+)
+err = bus.Publish(ctx, "orders",
+	OrderPlaced{ID: 7})
+
+unsubscribe()
+```
+
+</div>
+
+<LinkCard title="Migration guide" href="migrating-from-v1/" description="Every v1 call and its v2 form, and the behaviour changes to know about." />
+
+</div>
+
+<div class="cta not-content">
+	<h2>Publish your first event in five minutes</h2>
+	<p>Install the module, subscribe two handlers, and publish to both. The guide walks through full queues and shutdown too.</p>
+	<div class="cta-actions">
+		<LinkButton href="getting-started/" icon="right-arrow">Get started</LinkButton>
+		<LinkButton href="publishing/" variant="minimal">Read the docs</LinkButton>
+	</div>
+</div>
